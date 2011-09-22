@@ -3,8 +3,7 @@ Django Common
 ====================
 
 The Django Common project is a set of project independant reusable features.
-
-Currently, the following feautres have been written and are working in Django 1.3:
+Currently, the following feautres have been gathered and are working in Django 1.3:
 
 widgets
     - DiggPaginatorWidget
@@ -39,7 +38,7 @@ Installation
 
 #. Add the `common` directory to your Python path.
 
-#. Add comm
+#. Add `common` to your INSTALLED_APPS if you want to use templates and templatetags
 
 Configuration
 =============
