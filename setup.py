@@ -2,8 +2,8 @@ from setuptools import setup, find_packages
 
 setup(
     name='django-common',
-    version=__import__('debug_common').__version__,
-    description='A configurable set of panels that display various debug information about the current request/response.',
+    version=__import__('common').__version__,
+    description='A set of project independent reusable features.',
     long_description=open('README.rst').read(),
     # Get more strings from http://www.python.org/pypi?:action=list_classifiers
     author='Bas Koopmans',

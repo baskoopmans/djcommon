@@ -2,7 +2,7 @@
 Django Common
 ====================
 
-The Django Common project is a set of project independant reusable features.
+The Django Common project is a set of project independent reusable features.
 Currently, the following feautres have been gathered and are working in Django 1.3:
 
 widgets
