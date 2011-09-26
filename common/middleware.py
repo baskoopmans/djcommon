@@ -1,38 +1,41 @@
 # -*- coding: utf-8 -*-
 
+import re
+
 from django.conf import settings
 from django.core.urlresolvers import reverse
 from django.http import HttpResponseRedirect, HttpResponseForbidden, get_host
-
-
-RE_WHITESPACE = re.compile('\s*\n')
 
 
 class StripWhitespaceMiddleware:
     """
     Strips leading and trailing whitespace from response content.
     """
+    RE_WHITESPACE = re.compile('\s*\n')
+    
     def process_response(self, request, response):
-        if 'text/html' in response['Content-Type'] and settings.MINIFY_HTML:
-            response.content = RE_WHITESPACE.sub('\n', response.content)
+        if 'text/html' in response['Content-Type']:
+            response.content = self.RE_WHITESPACE.sub('\n', response.content)
             if response.content[:1] == '\n':
                 response.content = response.content[1:]
+                
         return response
 
 
 class RestrictedAccessMiddleware(object):
     """
     This middleware restrict access to site for not authenticated users.
-    or allows users with a given ipaddress
+    or allows users with a given ip address
     """
     def process_view(self, request, view_func, view_args, view_kwargs):
         
         RESTRICTED_ACCESS_ALLOWED_IPS = getattr(settings, 'RESTRICTED_ACCESS_ALLOWED_IPS', ())
         REMOTE_ADDR = request.META.get('HTTP_X_REAL_IP', request.META.get('REMOTE_ADDR', None))
+        
         if REMOTE_ADDR in RESTRICTED_ACCESS_ALLOWED_IPS:
             return None
             
-        RESTRICTED_ACCESS_LEVEL = getattr(settings, 'RESTRICTED_ACCESS_LEVEL', None) # authenticated, staff, superadmins
+        RESTRICTED_ACCESS_LEVEL = getattr(settings, 'RESTRICTED_ACCESS_LEVEL', None) # authenticated, staff, super admins
         if RESTRICTED_ACCESS_LEVEL in ('authenticated', 'staff', 'superusers') and \
             not request.path.startswith(('settings.LOGIN_URL', reverse('admin:index'),)):
             if not hasattr(request, 'user'):
@@ -57,7 +60,6 @@ class SSLMiddleware:
     object's is_secure method to reflect whether or not the header's value
     is the specified secure protocol (e.g. "https"), defaulting to insecure.
     """
-
 
     def process_request(self, request):
         if 'HTTP_X_FORWARDED_SECURE' and 'HTTP_X_FORWARDED_SCHEME' in request.META:

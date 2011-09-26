@@ -4,16 +4,34 @@ from django.utils.translation import ugettext as _
 
 from common.helpers import uniqify
 
+def add_css_classes(f, **kwargs):
+    """
+    Credits go to Ramen
+    http://djangosnippets.org/snippets/2097/
+    
+    Formfield callback that adds a CSS class to every field indicating
+    what kind of field it is. For example, all CharField inputs will get
+    a class of "vCharField". If the field's widget already has a
+    "class" attribute, it will be left alone.
+    """
+
+    field = f.formfield(**kwargs)
+    if field and 'class' not in field.widget.attrs:
+        field.widget.attrs['class'] = 'v%s' % field.__class__.__name__
+        
+    return field
 
 class EnhancedForm(forms.Form):
     error_css_class = 'error'
     required_css_class = 'required'
+    formfield_callback = add_css_classes
     
                     
 class EnhancedModelForm(forms.ModelForm):
     error_css_class = EnhancedForm.error_css_class
     required_css_class = EnhancedForm.required_css_class
-    
+    formfield_callback = EnhancedForm.formfield_callback
+
     def __init__(self, *args, **kwargs):
         super(EnhancedModelForm, self).__init__(*args, **kwargs)
         
