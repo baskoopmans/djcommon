@@ -8,7 +8,7 @@ from common.widgets.admin import VerboseManyToManyRawIdWidget
 
 class EnhancedModelAdmin(admin.ModelAdmin):
 
-    def formfield_for_manytomany(self, db_field, **kwargs):
+    def formfield_for_manytomany(self, db_field, request, **kwargs):
         """
         Check `raw_id_fields` for `db_field_name` and use VerboseManyToManyRawIdWidget for m2m relationships
         """
@@ -35,7 +35,8 @@ class EnhancedModelAdmin(admin.ModelAdmin):
         Used to redirect users back to their filtered list of locations if there were any.
         Save the referer of the page to return to the filtered change_list after saving the page
         """
-        result = super(EnhancedModelAdmin, self).change_view(request, object_id, extra_context )
+        result = super(EnhancedModelAdmin, self).change_view(request, object_id, extra_context=extra_context)
+        #raise Exception(result)
         
         # Look at the referer for a query string '^.*\?.*$'
         ref = request.META.get('HTTP_REFERER', '')
@@ -53,17 +54,17 @@ class EnhancedModelAdmin(admin.ModelAdmin):
                 
         return result
 
-class EnhancedModelAdmin(admin.options.InlineModelAdmin):
+class EnhancedInlineModelAdmin(admin.options.InlineModelAdmin):
     def formfield_for_manytomany(self, db_field, request=None, **kwargs):
         if db_field.name in self.raw_id_fields:
             kwargs['widget'] = VerboseManyToManyRawIdWidget(db_field.rel)
             return db_field.formfield(**kwargs)
-        return super(EnhancedModelAdmin, self).formfield_for_manytomany(db_field, request, **kwargs)
+        return super(EnhancedInlineModelAdmin, self).formfield_for_manytomany(db_field, request, **kwargs)
 
 
-class EnhancedStackedInline(admin.StackedInline, EnhancedModelAdmin):
+class EnhancedStackedInline(admin.StackedInline, EnhancedInlineModelAdmin):
     pass
 
 
-class EnhancedTabularInline(admin.TabularInline, EnhancedModelAdmin):
+class EnhancedTabularInline(admin.TabularInline, EnhancedInlineModelAdmin):
     pass

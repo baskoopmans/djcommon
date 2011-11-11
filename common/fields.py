@@ -13,7 +13,7 @@ class MultiSelectFormField(forms.MultipleChoiceField):
     def __init__(self, *args, **kwargs):
         self.max_choices = kwargs.pop('max_choices', 0)
         super(MultiSelectFormField, self).__init__(*args, **kwargs)
-        self.initial = kwargs.pop('initial').split(',')
+        self.initial = kwargs.pop('initial', '').split(',')
  
     def clean(self, value):
         if not value and self.required:
