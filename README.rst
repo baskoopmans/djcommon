@@ -33,7 +33,7 @@ widgets
     - admin.VerboseManyToManyRawIdWidget
 templatetags
     - common
-        * filters: cut, replace, nowhitespace, cleanwhitespace, startswith, endswith
+        * filters: cleartags, cut, replace, nowhitespace, cleanwhitespace, startswith, endswith
     - development
         * filters: attributes, attributes_formatted, getattribute
 templates
