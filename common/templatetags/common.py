@@ -7,6 +7,25 @@ from django.template.defaultfilters import stringfilter
 
 register = template.Library()
 
+
+@register.filter_function
+def random_slice(value, arg=1):
+    """
+    Returns one or more random item(s) from the list
+    """
+    try:
+        arg = int(arg)
+    except ValueError:
+        return value
+    if arg == 1:
+        return random.sample(value, arg)
+    elif len(value) > arg:  # Only pick if we are asked for fewer items than we are given
+        return random.sample(value, arg)
+    else:   # Number requested is equal to or greater than the number we have, return them all in random order
+        new_list = list(value)
+        random.shuffle(new_list)
+        return new_list
+
 @register.filter
 @stringfilter
 def cleartags(value, tags):
