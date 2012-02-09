@@ -1,9 +1,11 @@
 # -*- coding: utf-8 -*-
 
 import re
+import random
 
 from django import template
 from django.template.defaultfilters import stringfilter
+from django.template import Template, Variable, TemplateSyntaxError
 
 register = template.Library()
 
@@ -25,6 +27,26 @@ def random_slice(value, arg=1):
         new_list = list(value)
         random.shuffle(new_list)
         return new_list
+
+
+class RenderAsTemplateNode(template.Node):
+    def __init__(self, item_to_be_rendered):
+        self.item_to_be_rendered = Variable(item_to_be_rendered)
+
+    def render(self, context):
+        try:
+            actual_item = self.item_to_be_rendered.resolve(context)
+            return Template(actual_item).render(context)
+        except template.VariableDoesNotExist:
+            return ''
+
+@register.tag
+def render_as_template(parser, token):
+    bits = token.split_contents()
+    if len(bits) !=2:
+        raise TemplateSyntaxError("'%s' takes only one argument"
+                                  " (a variable representing a template to render)" % bits[0])
+    return RenderAsTemplateNode(bits[1])
 
 @register.filter
 @stringfilter

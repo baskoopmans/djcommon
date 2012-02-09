@@ -1,23 +1,23 @@
+{% if form.is_valid %}{% endif %}
 {% for field in form %}
-
     {% if field.field.combined %}
         {% if field.field.combined.first %}
-        <div id="{{ field.html_name }}" class="row{% if field.field.widget.check_test %} checkbox{% endif %}{% if field.field.widget.choices %} choices{% endif %}{% if field.field.combined.css_classes %} {{ field.field.combined.css_classes }}{% endif %}">
-        {{ field.field.combined.errors }}
-            <label for="id_{{ field.html_name }}">{{ field.field.combined.label }}:</label>
+            <div id="{{ field.html_name }}" class="row{% if field.field.widget.check_test %} checkbox{% endif %}{% if field.field.widget.choices %} choices{% endif %}{% if field.field.combined.css_classes %} {{ field.field.combined.css_classes }}{% endif %}">
+                {{ field.field.combined.errors }}
+                <label for="id_{{ field.html_name }}">{{ field.field.combined.label }}:</label>
         {% endif %}
-        
-        {{ field }}
-        
+
+                {{ field }}
+
         {% if field.field.combined.last %}
-        </div>
+            </div>
         {% endif %}
-        
+
     {% else %}
-    <div id="{{ field.html_name }}" class="row{% if field.field.widget.check_test != None %} checkbox{% endif %}{% if field.field.widget.choices != None %} choices{% endif %}{% if field.css_classes %} {{ field.css_classes }}{% endif %}">
-        {{ field.errors }}
-        <label for="id_{{ field.html_name }}">{{ field.label }}:</label>{{ field }}
-        {% if field.help_text %}<span>{{ field.help_text }}</span>{% endif %}
-    </div>
+        <div id="{{ field.html_name }}" class="row{% if field.field.widget.check_test != None %} checkbox{% endif %}{% if field.field.widget.choices != None %} choices{% endif %}{% if field.css_classes %} {{ field.css_classes }}{% endif %}">
+            {{ field.errors }}
+            <label for="id_{{ field.html_name }}">{{ field.label }}:</label>{{ field }}
+            {% if field.help_text %}<span>{{ field.help_text }}</span>{% endif %}
+        </div>
     {% endif %}
 {% endfor %}
