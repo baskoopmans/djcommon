@@ -5,7 +5,11 @@ from cStringIO import StringIO
 from django.template import loader, Context, RequestContext
 from django.views.generic.base import TemplateResponseMixin
 from django.http import HttpResponse
+from django.conf import settings
 
+
+def fetch_resources(uri, rel):
+    return os.path.join(settings.MEDIA_ROOT, uri.replace(settings.MEDIA_URL, ""))
 
 def content_to_pdf(content, dest, encoding='utf-8', **kwargs):
     """
@@ -17,7 +21,7 @@ def content_to_pdf(content, dest, encoding='utf-8', **kwargs):
     except ImportError:
         from ho import pisa
     src = StringIO(content.encode(encoding))
-    pdf = pisa.pisaDocument(src, dest, **kwargs)
+    pdf = pisa.pisaDocument(src, dest, link_callback=fetch_resources, **kwargs)
     return not pdf.err
 
 def content_to_response(content, filename=None):
