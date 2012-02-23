@@ -7,7 +7,6 @@ from django.views.generic.base import TemplateResponseMixin
 from django.http import HttpResponse
 from django.conf import settings
 
-
 def fetch_resources(uri, rel):
     return os.path.join(settings.MEDIA_ROOT, uri.replace(settings.MEDIA_URL, ""))
 
@@ -16,12 +15,9 @@ def content_to_pdf(content, dest, encoding='utf-8', **kwargs):
     Write into *dest* file object the given html *content*.
     Return True if the operation completed successfully.
     """
-    try:
-        from xhtml2pdf import pisa
-    except ImportError:
-        from ho import pisa
+    from xhtml2pdf import pisa
     src = StringIO(content.encode(encoding))
-    pdf = pisa.pisaDocument(src, dest, link_callback=fetch_resources, **kwargs)
+    pdf = pisa.createPDF(src, dest, **kwargs)
     return not pdf.err
 
 def content_to_response(content, filename=None):
@@ -33,8 +29,7 @@ def content_to_response(content, filename=None):
         response['Content-Disposition'] = 'attachment; filename=%s' % filename
     return response
 
-def render_to_pdf(request, template, context, filename=None, encoding='utf-8', 
-    **kwargs):
+def render_to_pdf(request, template, context, filename=None, encoding='utf-8', **kwargs):
     """
     Render a pdf response using given *request*, *template* and *context*.
     """
