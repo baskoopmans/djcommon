@@ -17,7 +17,7 @@ def content_to_pdf(content, dest, encoding='utf-8', **kwargs):
     """
     from xhtml2pdf import pisa
     src = StringIO(content.encode(encoding))
-    pdf = pisa.pisaDocument(src, dest, **kwargs)
+    pdf = pisa.pisaDocument(src, dest, link_callback=fetch_resources, **kwargs)
     return not pdf.err
 
 def content_to_response(content, filename=None):
