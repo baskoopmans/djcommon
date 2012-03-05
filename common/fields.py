@@ -6,6 +6,13 @@ from django.db.models.fields import CharField
 from django.utils.encoding import force_unicode, StrAndUnicode
 from django.utils.text import capfirst
 
+class LazyChoiceField(forms.ChoiceField):
+    #def __init__(self, choices=(), required=True, widget=None, label=None, initial=None, help_text=None, *args, **kwargs):
+    #    super(LazyChoiceField, self).__init__(choices=choices, required=required, widget=widget, label=label, initial=initial, help_text=help_text, *args, **kwargs)
+
+    def valid_value(self, value):
+        return True
+
 
 class MultiSelectFormField(forms.MultipleChoiceField):
     widget = forms.CheckboxSelectMultiple
