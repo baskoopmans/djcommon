@@ -60,6 +60,12 @@ cleartags.is_safe = True
 
 @register.filter
 @stringfilter
+def split(str, splitter):
+    "Splits the string for with the given splitter"
+    return str.split(splitter)
+
+@register.filter
+@stringfilter
 def cut(value, arg):
     "Removes all values of arg from the given string"
     return value.replace(arg, '')
