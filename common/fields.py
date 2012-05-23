@@ -188,10 +188,36 @@ class CountryField(CharField):
         return unicode(value)
 
 
+class IntegerRangeField(models.IntegerField):
+
+    def __init__(self, verbose_name=None, name=None, min_value=None, max_value=None, **kwargs):
+        self.min_value, self.max_value = min_value, max_value
+        models.IntegerField.__init__(self, verbose_name, name, **kwargs)
+
+    def formfield(self, **kwargs):
+        defaults = {'min_value': self.min_value, 'max_value':self.max_value}
+        defaults.update(kwargs)
+        return super(IntegerRangeField, self).formfield(**defaults)
+
+
+class SmallIntegerRangeField(models.SmallIntegerField):
+
+    def __init__(self, verbose_name=None, name=None, min_value=None, max_value=None, **kwargs):
+        self.min_value, self.max_value = min_value, max_value
+        models.SmallIntegerField.__init__(self, verbose_name, name, **kwargs)
+
+    def formfield(self, **kwargs):
+        defaults = {'min_value': self.min_value, 'max_value':self.max_value}
+        defaults.update(kwargs)
+        return super(SmallIntegerRangeField, self).formfield(**defaults)
+
+
 # If south is installed, ensure that CountryField and MultiSelectField will be introspected just like a normal CharField.
 try:
     from south.modelsinspector import add_introspection_rules
     add_introspection_rules([], ['^common\.fields\.CountryField'])
     add_introspection_rules([], ['^common\.fields\.MultiSelectField'])
+    add_introspection_rules([], ['^common\.fields\.IntegerRangeField'])
+    add_introspection_rules([], ['^common\.fields\.SmallIntegerRangeField'])
 except ImportError:
     pass
