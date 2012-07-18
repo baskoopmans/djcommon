@@ -1,3 +1,5 @@
+# coding: utf-8
+
 from django import forms
 from django.forms.util import ErrorList, ErrorDict
 from django.utils.copycompat import deepcopy
