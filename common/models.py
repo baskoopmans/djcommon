@@ -17,7 +17,7 @@ class OrderableModel(models.Model):
         """
         Calculate position (max+1) for new records
         """
-        if not self.inline_ordering_position:
+        if not self.position:
             max = self.__class__.objects.filter().aggregate(models.Max('position'))
             try:
                 self.position = max['position__max'] + 1
