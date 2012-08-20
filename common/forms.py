@@ -13,9 +13,8 @@ def add_css_classes(f, **kwargs):
     Credits go to Ramen
     http://djangosnippets.org/snippets/2097/
     
-    Formfield callback that adds a CSS class to every field indicating
-    what kind of field it is. For example, all CharField inputs will get
-    a class of "vCharField". If the field's widget already has a
+    Formfield callback that adds a CSS class to every field indicating what kind of field it is.
+    For example, all CharField inputs will get a class of "vCharField". If the field's widget already has a
     "class" attribute, it will be left alone.
     """
 

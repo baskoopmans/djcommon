@@ -2,24 +2,27 @@
 
 import os
 
-from django.template import loader
+from django.template.loader_tags import BlockNode, ExtendsNode
+from django.template import loader, Context, RequestContext, TextNode
 
 from helpers import uniqify_list
 
-def get_available_templates(dir=''):
+
+def get_available_templates(dir='', exclude=()):
     SEARCH_DIRS = []
     TEMPLATE_NAMES = []
 
-    for ldr in loader.template_source_loaders:
+    from django.template.loader import template_source_loaders
+    for ldr in template_source_loaders:
         SEARCH_DIRS += [x for x in ldr.get_template_sources(dir)]
 
     for dir in SEARCH_DIRS:
         try:
-            TEMPLATE_NAMES += [x for x in os.listdir(dir) if x.endswith(".html")]
+            TEMPLATE_NAMES += [x for x in os.listdir(dir) if x.endswith(".html") and not x in exclude]
         except:
             pass
 
-    return uniqify_list(TEMPLATE_NAMES)
+    return TEMPLATE_NAMES
 
-def get_template_choices(dir=''):
-    return [(x, "%s (%s)" % (x.replace('.html', '').capitalize(), x)) for x in get_available_templates(dir)]
+def get_template_choices(dir='', exclude=()):
+    return [(x, "%s" % (x.replace('.html', '').capitalize()),) for x in get_available_templates(dir, exclude)]

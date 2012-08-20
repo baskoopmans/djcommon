@@ -5,9 +5,121 @@ import random
 
 from django import template
 from django.template.defaultfilters import stringfilter
-from django.template import Template, Variable, TemplateSyntaxError
+from django.template import loader, Template, Variable, TemplateSyntaxError
+
+from django.template.loader_tags import BlockNode, ExtendsNode
+from django.template import loader, Context, RequestContext, TextNode
 
 register = template.Library()
+
+
+def get_template(template):
+    if isinstance(template, (tuple, list)):
+        return loader.select_template(template)
+    return loader.get_template(template)
+
+class BlockNotFound(Exception):
+    pass
+
+def render_template_block(template, block, context):
+    """
+    Renders a single block from a template. This template should have previously been rendered.
+    """
+    return render_template_block_nodelist(template.nodelist, block, context)
+
+def render_template_block_nodelist(nodelist, block, context):
+    for node in nodelist:
+        if isinstance(node, BlockNode) and node.name == block:
+            return node.render(context)
+        for key in ('nodelist', 'nodelist_true', 'nodelist_false'):
+            if hasattr(node, key):
+                try:
+                    return render_template_block_nodelist(getattr(node, key), block, context)
+                except:
+                    pass
+    for node in nodelist:
+        if isinstance(node, ExtendsNode):
+            try:
+                return render_template_block(node.get_parent(context), block, context)
+            except BlockNotFound:
+                pass
+    raise BlockNotFound(block)
+
+def render_block_to_string(template_name, block, dictionary=None, context_instance=None):
+    """
+    Loads the given template_name and renders the given block with the given dictionary as
+    context. Returns a string.
+    """
+    import re
+
+    dictionary = dictionary or {}
+    t = get_template(template_name)
+    if context_instance:
+        context_instance.update(dictionary)
+    else:
+        context_instance = Context(dictionary)
+    template_block = render_template_block(t, block, context_instance)
+    return re.sub(r'\s+', ' ', template_block)
+
+def direct_block_to_template(request, template, block, extra_context=None, mimetype=None, **kwargs):
+    """
+    Render a given block in a given template with any extra URL parameters in the context as
+    ``{{ params }}``.
+    """
+    if extra_context is None:
+        extra_context = {}
+    dictionary = {'params': kwargs}
+    for key, value in extra_context.items():
+        if callable(value):
+            dictionary[key] = value()
+        else:
+            dictionary[key] = value
+    c = RequestContext(request, dictionary)
+    t = get_template(template)
+    t.render(c)
+    return HttpResponse(render_template_block(t, block, c), mimetype=mimetype)
+
+
+
+class RenderAsTemplateNode(template.Node):
+    def __init__(self, item_to_be_rendered):
+        self.item_to_be_rendered = Variable(item_to_be_rendered)
+
+    def render(self, context):
+        try:
+            actual_item = self.item_to_be_rendered.resolve(context)
+            return Template(actual_item).render(context)
+        except template.VariableDoesNotExist:
+            return ''
+
+@register.tag
+def render_as_template(parser, token):
+    bits = token.split_contents()
+    if len(bits) !=2:
+        raise TemplateSyntaxError("'%s' takes only one argument (a variable representing a template to render)" % bits[0])
+    return RenderAsTemplateNode(bits[1])
+
+class RenderTemplateBlockNode(template.Node):
+    def __init__(self, template_name, block_name):
+        self.template_name = template_name
+        self.block_name = block_name
+
+    def render(self, context):
+        #template_name = RenderAsTemplateNode(self.template_name).render(context)
+        #template = loader.get_template('pages/'+template_name).render(context)
+        return render_block_to_string('base.html', self.block_name[1:-1], context)
+
+@register.tag('render_template_block')
+def render_template_block_tag(parser, token):
+    try:
+        # split_contents() knows not to split quoted strings.
+        tag_name, template_name, block_name = token.split_contents()
+    except ValueError:
+        raise TemplateSyntaxError("'%s' takes two arguments (a variable representing a template and a block name)" % tag_name)
+    if not (block_name[0] == block_name[-1] and block_name[0] in ('"', "'")):
+        raise template.TemplateSyntaxError("%r tag's argument (block_name) should be in quotes" % tag_name)
+    return RenderTemplateBlockNode(template_name, block_name)
+
 
 
 @register.filter_function
@@ -27,26 +139,6 @@ def random_slice(value, arg=1):
         new_list = list(value)
         random.shuffle(new_list)
         return new_list
-
-
-class RenderAsTemplateNode(template.Node):
-    def __init__(self, item_to_be_rendered):
-        self.item_to_be_rendered = Variable(item_to_be_rendered)
-
-    def render(self, context):
-        try:
-            actual_item = self.item_to_be_rendered.resolve(context)
-            return Template(actual_item).render(context)
-        except template.VariableDoesNotExist:
-            return ''
-
-@register.tag
-def render_as_template(parser, token):
-    bits = token.split_contents()
-    if len(bits) !=2:
-        raise TemplateSyntaxError("'%s' takes only one argument"
-                                  " (a variable representing a template to render)" % bits[0])
-    return RenderAsTemplateNode(bits[1])
 
 @register.filter
 @stringfilter
