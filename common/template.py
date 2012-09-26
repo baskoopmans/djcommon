@@ -13,8 +13,11 @@ def get_available_templates(dir='', exclude=()):
     TEMPLATE_NAMES = []
 
     from django.template.loader import template_source_loaders
-    for ldr in template_source_loaders:
-        SEARCH_DIRS += [x for x in ldr.get_template_sources(dir)]
+    try:
+        for ldr in template_source_loaders:
+            SEARCH_DIRS += [x for x in ldr.get_template_sources(dir)]
+    except TypeError:
+        pass
 
     for dir in SEARCH_DIRS:
         try:
