@@ -3,6 +3,7 @@
 from decimal import Decimal 
 
 from django.conf import settings
+from django.utils import simplejson
 
 
 # for formatting Decimal objects
@@ -28,3 +29,14 @@ def contains(list, filter):
         if filter(x):
             return True
     return False
+
+def get_json_object(request):
+    data = None
+    if request.body:
+        try:
+            data = simplejson.loads(request.body.replace("'","\""), encoding='utf-8')
+        except:
+            data = data
+
+    if data and type(data) is dict:
+        return data
