@@ -40,3 +40,12 @@ def get_json_object(request):
 
     if data and type(data) is dict:
         return data
+
+def model_field_has_changed(instance, field):
+    """
+    Check if a given field on a model has changed
+    """
+    if not instance.pk:
+        return False
+    old_value = instance.__class__._default_manager.filter(pk=instance.pk).values(field).get()[field]
+    return not getattr(instance, field) == old_value
