@@ -1,6 +1,9 @@
 # coding: utf-8
 
-from decimal import Decimal 
+import sys
+
+from importlib import import_module
+from decimal import Decimal
 
 from django.conf import settings
 from django.utils import simplejson
@@ -49,3 +52,8 @@ def model_field_has_changed(instance, field):
         return False
     old_value = instance.__class__._default_manager.filter(pk=instance.pk).values(field).get()[field]
     return not getattr(instance, field) == old_value
+
+def reload_urlconf(self):
+    if settings.ROOT_URLCONF in sys.modules:
+        reload(sys.modules[settings.ROOT_URLCONF])
+    return import_module(settings.ROOT_URLCONF)
