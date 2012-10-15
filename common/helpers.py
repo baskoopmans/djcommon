@@ -53,7 +53,7 @@ def model_field_has_changed(instance, field):
     old_value = instance.__class__._default_manager.filter(pk=instance.pk).values(field).get()[field]
     return not getattr(instance, field) == old_value
 
-def reload_urlconf(self):
+def reload_urlconf():
     if settings.ROOT_URLCONF in sys.modules:
         reload(sys.modules[settings.ROOT_URLCONF])
     return import_module(settings.ROOT_URLCONF)
