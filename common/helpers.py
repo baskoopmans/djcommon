@@ -53,6 +53,14 @@ def model_field_has_changed(instance, field):
     old_value = instance.__class__._default_manager.filter(pk=instance.pk).values(field).get()[field]
     return not getattr(instance, field) == old_value
 
+def touch(path):
+    import os, time
+    now = time.time()
+    try:
+        os.utime(path, (now, now))
+    except os.error:
+        raise Exception("Touching '%s' failed" % path)
+
 def reload_urlconf():
     if settings.ROOT_URLCONF in sys.modules:
         reload(sys.modules[settings.ROOT_URLCONF])
