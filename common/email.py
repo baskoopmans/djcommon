@@ -1,5 +1,6 @@
 # coding: utf-8
 
+#from email.mime.base import MIMEBase
 from django.conf import settings
 from django.core.mail import EmailMultiAlternatives
 from django.template.loader import select_template
