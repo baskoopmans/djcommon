@@ -6,6 +6,7 @@ import random
 from django import template
 from django.template.defaultfilters import stringfilter
 from django.template import loader, Template, Variable, TemplateSyntaxError
+from django.db.models.query import QuerySet
 
 from django.template.loader_tags import BlockNode, ExtendsNode
 from django.template import loader, Context, RequestContext, TextNode
@@ -121,24 +122,32 @@ def render_template_block_tag(parser, token):
     return RenderTemplateBlockNode(template_name, block_name)
 
 
+def random_slice_list(value, arg):
+    # Only pick if we are asked for fewer items than we are given
+    # Else number requested is equal to or greater than the number we have, return them all in random order
+    if len(value) > arg or arg == 1:
+        return random.sample(value, arg)
+    else:
+        return random.shuffle(value)
 
 @register.filter_function
 def random_slice(value, arg=1):
     """
-    Returns one or more random item(s) from the list
+    Returns one or more random item(s) from the list or if it's a queryset a new filtered queryset.
     """
     try:
         arg = int(arg)
     except ValueError:
-        return value
-    if arg == 1:
-        return random.sample(value, arg)
-    elif len(value) > arg:  # Only pick if we are asked for fewer items than we are given
-        return random.sample(value, arg)
-    else:   # Number requested is equal to or greater than the number we have, return them all in random order
-        new_list = list(value)
-        random.shuffle(new_list)
-        return new_list
+        raise Exception('Invalid argument: %s' % arg)
+
+    if type(value) == QuerySet:
+        pks = list(value.values_list('pk', flat=True))
+        random_pks = random_slice_list(pks, arg)
+        return value.filter(pk__in=random_pks)
+    elif type(value) == list:
+        return random_slice_list(value, arg)
+    else:
+        return value[:arg]
 
 @register.filter
 @stringfilter
