@@ -126,9 +126,11 @@ def random_slice_list(value, arg):
     # Only pick if we are asked for fewer items than we are given
     # Else number requested is equal to or greater than the number we have, return them all in random order
     if len(value) > arg or arg == 1:
-        return random.sample(value, arg)
+        value = random.sample(value, arg)
     else:
-        return random.shuffle(value)
+        random.shuffle(value)
+
+    return value
 
 @register.filter_function
 def random_slice(value, arg=1):
