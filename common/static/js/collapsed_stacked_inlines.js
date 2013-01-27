@@ -16,7 +16,7 @@ jQuery(function($) {
 
         // Add toggle link
         h3.prepend('<a class="stacked_collapse-toggle" href="#">(' + gettext('Show') + ')</a> ');
-        h3.find('a.stacked_collapse-toggle').bind("click", function(){
+        h3.find('a.stacked_collapse-toggle').on("click", function(){
             fs = $(this).parent('h3').next('fieldset');
             if (!fs.hasClass('collapsed'))
             {

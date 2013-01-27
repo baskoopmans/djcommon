@@ -19,7 +19,7 @@ jQuery(function($) {
 
         // Add toggle link
         h2.append(' <a class="collapse-toggle" href="#">(' + gettext('Show') + ')</a> ');
-        h2.find('a.collapse-toggle').live("click", function(){
+        h2.find('a.collapse-toggle').on("click", function(){
             fs = $(this).parent('h2').parent('fieldset');
             if (!fs.hasClass('collapsed'))
             {
