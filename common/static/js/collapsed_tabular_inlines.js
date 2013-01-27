@@ -8,6 +8,9 @@ jQuery(function($) {
         fs = $(this).find('fieldset').addClass('collapse')
         h2 = $(this).find('h2:first')
 
+        // Count entries
+        h2.append(' ' + fs.find('tbody tr').not('.empty-form, .add-row').length)
+
         // Don't collapse if fieldset contains errors
         if (fs.find('[class^=error]').length != 0){
             fs.removeClass('collapsed');
