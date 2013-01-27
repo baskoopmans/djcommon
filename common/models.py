@@ -1,13 +1,14 @@
 # -*- coding: utf-8 -*-
 
 from django.db import models
+from django.db.models.query import QuerySet
 
 
 class OrderableModel(models.Model):
     """
     Add extra field and default ordering column for and inline orderable model
     """
-    position = models.IntegerField(blank=True, null=True)
+    position = models.IntegerField(blank=True, null=True, db_index=True)
 
     class Meta:
         abstract = True
@@ -32,3 +33,49 @@ class TimeStampedModel(models.Model):
 
   class Meta:
       abstract = True
+
+
+class SubclassQuerySet(QuerySet):
+
+    def iterator(self):
+        for obj in super(SubclassQuerySet, self).iterator():
+            yield obj.get_subclass_object()
+
+
+class SubclassManager(models.Manager):
+
+    def get_query_set(self):
+        return SubclassQuerySet(self.model)
+
+
+class ParentModel(models.Model):
+    _subclass_name = models.CharField(max_length=100, editable=False)
+
+    class Meta:
+        abstract = True
+
+    def save(self, *args, **kwargs):
+        self._subclass_name = self.get_subclass_name()
+        super(ParentModel, self).save(*args, **kwargs)
+
+    def get_subclass_name(self):
+        if type(self) is self.get_parent_model():
+            return self._subclass_name
+        if self._meta.proxy:
+            return self.__class__.__name__.lower()
+        return self.get_parent_link().related_query_name()
+
+    def get_subclass_object(self):
+        if self._meta.proxy:
+            pass
+        else:
+            return getattr(self, self.get_subclass_name())
+
+    def get_parent_link(self):
+        return self._meta.parents[self.get_parent_model()]
+
+    def get_parent_model(self):
+        raise NotImplementedError
+
+    def get_parent_object(self):
+        return getattr(self, self.get_parent_link().name)
