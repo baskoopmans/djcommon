@@ -137,7 +137,7 @@ class TemplatedEmail(EmailMultiRelated):
             'remove_classes': False,
             'remove_comments': False,
         }
-        cleaned_html_url = requests.post('http://premailer.dialect.ca/api/0.1/documents', data).json.get('documents').get('html')
+        cleaned_html_url = requests.post('http://premailer.dialect.ca/api/0.1/documents', data).json().get('documents').get('html')
         response = requests.get(cleaned_html_url)
         return response.content
 
