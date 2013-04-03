@@ -61,6 +61,10 @@ def touch(path):
     except os.error:
         raise Exception("Touching '%s' failed" % path)
 
+def construct_object(location, **kwargs):
+    module, object = location.rsplit(".", 1)
+    return getattr(import_module(module), object)(**kwargs)
+
 def reload_urlconf():
     if settings.ROOT_URLCONF in sys.modules:
         reload(sys.modules[settings.ROOT_URLCONF])
