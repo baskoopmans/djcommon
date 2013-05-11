@@ -1,3 +1,5 @@
+# coding: utf-8
+
 import os
 from cgi import escape
 from cStringIO import StringIO

@@ -1,6 +1,4 @@
-# Copyright 2011 - The New Style, all rights reserved.
-# It is forbidden to alter, duplicate or redistribute any part of this document.
-# -*- coding: utf-8 -*-
+# coding: utf-8
 
 from django.http import HttpResponseNotAllowed
 from django.shortcuts import render_to_response

@@ -1,6 +1,4 @@
-# Copyright 2011 - The New Style, all rights reserved.
-# It is forbidden to alter, duplicate or redistribute any part of this document.
-# -*- coding: utf-8 -*-
+# coding: utf-8
 
 from django.contrib.admin.widgets import ManyToManyRawIdWidget
 from django.utils.encoding import smart_unicode

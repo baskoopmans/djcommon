@@ -1,3 +1,5 @@
+# coding: utf-8
+
 from django.contrib.auth.models import User
 from django.core.validators import email_re
 

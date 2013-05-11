@@ -1,3 +1,5 @@
+# coding: utf-8
+
 # Source: http://www.djangosnippets.org/snippets/773/
 # Author: miracle2k
 # Posted: May 26, 2008
