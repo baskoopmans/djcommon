@@ -29,7 +29,7 @@ class EnhancedForm(forms.Form):
     error_css_class = 'error'
     required_css_class = 'required'
     formfield_callback = add_css_classes
-    
+
                     
 class EnhancedModelForm(forms.ModelForm):
     error_css_class = EnhancedForm.error_css_class

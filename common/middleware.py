@@ -64,7 +64,7 @@ class RestrictedAccessMiddleware(object):
             
         RESTRICTED_ACCESS_LEVEL = getattr(settings, 'RESTRICTED_ACCESS_LEVEL', None) # authenticated, staff, super admins
         if RESTRICTED_ACCESS_LEVEL in ('authenticated', 'staff', 'superusers') and \
-            not request.path.startswith(('settings.LOGIN_URL', reverse('admin:index'),)):
+            not request.path.startswith((reverse('account:login'), reverse('admin:index'),)):
             if not hasattr(request, 'user'):
                 raise ImproperlyConfigured(
                     "RestrictedAccessMiddleware requires the authentication middleware to be installed. "
@@ -75,7 +75,7 @@ class RestrictedAccessMiddleware(object):
                     (RESTRICTED_ACCESS_LEVEL == 'superusers' and not request.user.is_superusers):
                     return HttpResponseForbidden('You\'re access is restricted. <a href="%s">Logout</a>' % reverse('admin:logout'))
             else:
-                return HttpResponseRedirect('%s?next=%s' % (settings.LOGIN_URL, request.path))
+                return HttpResponseRedirect('%s?next=%s' % (reverse('account:login'), request.path))
         else:
             return None
 

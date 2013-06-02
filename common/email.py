@@ -106,6 +106,8 @@ class TemplatedEmail(EmailMultiRelated):
         self.app_name = app_name
         self.template_name = template_name
         self.premailer = premailer
+        if not hasattr(to, "__iter__"):
+            to = [to]
         if context is None:
             context = {}
         if request:
