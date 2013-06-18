@@ -6,6 +6,7 @@ from importlib import import_module
 from decimal import Decimal
 
 from django.conf import settings
+from django.core.exceptions import ObjectDoesNotExist
 from django.utils import simplejson
 
 
@@ -50,7 +51,10 @@ def model_field_has_changed(instance, field):
     """
     if not instance.pk:
         return False
-    old_value = instance.__class__._default_manager.filter(pk=instance.pk).values(field).get()[field]
+    try:
+        old_value = instance.__class__._default_manager.filter(pk=instance.pk).values(field).get()[field]
+    except ObjectDoesNotExist:
+        return False
     return not getattr(instance, field) == old_value
 
 def touch(path):
