@@ -6,7 +6,6 @@ jQuery(function($) {
         items: '.row1, .row2',
         update: update
     });
-    $("div.inline-group").disableSelection();
 });
 
 function update() {
@@ -16,7 +15,7 @@ function update() {
 }
 
 jQuery(document).ready(function($){
-    $(this).find('.original').hide();
+    $(this).find('.original').hide().parent('tr').parent('tbody').parent('table').find("th[colspan='2']").removeAttr('colspan');
     $(this).find('input[id$=position]').parent('td').hide().parent('tr').parent('tbody').parent('table').find("th:contains('Position')").hide();
     $(this).find('input[id$=position]').parent('td').hide().parent('tr').parent('tbody').parent('table').css('cursor','move');
     $('.add-row a').click(update);
