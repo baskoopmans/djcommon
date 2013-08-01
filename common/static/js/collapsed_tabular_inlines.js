@@ -9,7 +9,7 @@ jQuery(function($) {
         h2 = $(this).find('h2:first')
 
         // Count entries
-        h2.append(' ' + fs.find('tbody tr').not('.empty-form, .add-row').length)
+        h2.append(' ' + fs.find('tbody tr').filter ('.has_original').length)
 
         // Don't collapse if fieldset contains errors
         if (fs.find('[class^=error]').length != 0){
