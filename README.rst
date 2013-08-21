@@ -31,6 +31,12 @@ forms
 widgets
     - DiggPaginatorWidget
     - admin.VerboseManyToManyRawIdWidget
+template
+    - get_available_templates
+    - get_template_choices
+    - CachedNode
+    - ContextUpdatingNode
+    - CachedContextUpdatingNode
 templatetags
     - common
         * filters: cleartags, cut, replace, nowhitespace, cleanwhitespace, startswith, endswith
