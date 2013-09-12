@@ -5,8 +5,9 @@ from django.forms.util import ErrorList, ErrorDict
 from django.utils.copycompat import deepcopy
 from django.utils.translation import ugettext as _
 from django.utils.functional import lazy
+from django.utils.safestring import mark_safe
 
-from helpers import uniqify_list
+from .helpers import uniqify_list
 
 def add_css_classes(f, **kwargs):
     """
@@ -24,20 +25,10 @@ def add_css_classes(f, **kwargs):
         
     return field
 
-
-class EnhancedForm(forms.Form):
-    error_css_class = 'error'
-    required_css_class = 'required'
-    formfield_callback = add_css_classes
-
-                    
-class EnhancedModelForm(forms.ModelForm):
-    error_css_class = EnhancedForm.error_css_class
-    required_css_class = EnhancedForm.required_css_class
-    formfield_callback = EnhancedForm.formfield_callback
+class CombinedFieldsMixin(object):
 
     def __init__(self, *args, **kwargs):
-        super(EnhancedModelForm, self).__init__(*args, **kwargs)
+        super(CombinedFieldsMixin, self).__init__(*args, **kwargs)
 
         # when subclassing a subclassed form with extra fields
         # remove those fields when the field is in exclude list
@@ -65,14 +56,15 @@ class EnhancedModelForm(forms.ModelForm):
                 elif counter == len(combination) - 1:
                     field.combined['last'] = True
 
-                _label_set.append(field.label.lower())
+                _label_set.append(u"%s" % field.label)
 
-            _first_field.combined['label'] = ' + '.join(_label_set)
-            _first_field.combined['label'] = _first_field.combined['label'].capitalize()
+            _first_field.combined['label'] = u" + ".join(uniqify_list(_label_set))
+            _first_field.combined['label'] = _first_field.combined['label']
+            _first_field.combined['errors'] = ErrorDict()
             _first_field.combined['css_classes'] = ' '.join(_css_classes_set)
 
     def _post_clean(self, *args, **kwargs):
-        super(EnhancedModelForm, self)._post_clean(*args, **kwargs)
+        super(CombinedFieldsMixin, self)._post_clean(*args, **kwargs)
 
         self.combined_fields = getattr(self.Meta, 'combined_fields', ())
 
@@ -89,3 +81,15 @@ class EnhancedModelForm(forms.ModelForm):
                 _error_set += self.errors.get(field_name, [])
 
             _first_field.combined['errors'] = ErrorList(uniqify_list(_error_set, True))
+
+
+class EnhancedForm(CombinedFieldsMixin, forms.Form):
+    error_css_class = 'error'
+    required_css_class = 'required'
+    formfield_callback = add_css_classes
+
+class EnhancedModelForm(CombinedFieldsMixin, forms.ModelForm):
+    error_css_class = 'error'
+    required_css_class = 'required'
+    formfield_callback = add_css_classes
+

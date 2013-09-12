@@ -4,7 +4,8 @@ import re
 
 from django.conf import settings
 from django.core.urlresolvers import reverse
-from django.http import HttpResponseRedirect, HttpResponseForbidden, get_host
+from django.http import HttpResponseRedirect, HttpResponseForbidden
+from django.template import TemplateSyntaxError
 
 
 class ForceResponse(Exception):
@@ -24,7 +25,6 @@ class ForceResponseMiddleware:
 		
         Instance of TemplateSyntaxError has exc_info field where it has the original exception. exc_info[1] is the exception instance.
         """
-        from django.template import TemplateSyntaxError
         if isinstance(e, TemplateSyntaxError) and getattr(e, 'exc_info', 0):
             try:
                 e = e.exc_info[1]
@@ -38,12 +38,12 @@ class StripWhitespaceMiddleware:
     """
     Strips leading and trailing whitespace from response content.
     """
-    RE_WHITESPACE = re.compile('\s*\n')
+    RE_WHITESPACE = re.compile(b'\s*\n')
     
     def process_response(self, request, response):
-        if 'text/html' in response['Content-Type']:
-            response.content = self.RE_WHITESPACE.sub('\n', response.content)
-            if response.content[:1] == '\n':
+        if 'text/html' in response.get('Content-Type', ''):
+            response.content = self.RE_WHITESPACE.sub(b'\n', response.content)
+            if response.content[:1] == b'\n':
                 response.content = response.content[1:]
                 
         return response
@@ -80,7 +80,7 @@ class RestrictedAccessMiddleware(object):
             return None
 
 
-class SSLMiddleware:
+class SSLMiddleware(object):
     """
     Based on https://github.com/rossdakin/django-heroism/blob/master/heroism/middleware.py
     If a specific header is present in the request, we redefine the request
@@ -111,11 +111,10 @@ class SSLMiddleware:
                         
     def _redirect(self, request, secure):
         protocol = secure and "https" or "http"
-        newurl = "%s://%s%s" % (protocol, get_host(request), request.get_full_path())
+        newurl = "%s://%s%s" % (protocol, request.get_host(), request.get_full_path())
 
         if settings.DEBUG and request.method == 'POST':
-            raise RuntimeError, \
-            """Django can't perform a SSL redirect while maintaining POST data.
-            Please structure your views so that redirects only occur during GETs."""
+            raise RuntimeError("Django can't perform a SSL redirect while maintaining POST data. \
+            Please structure your views so that redirects only occur during GETs.")
 
         return HttpResponseRedirect(newurl)

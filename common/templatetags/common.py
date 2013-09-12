@@ -151,6 +151,10 @@ def random_slice(value, arg=1):
     else:
         return value[:arg]
 
+@register.filter(name='zip')
+def zip_lists(a, b):
+    return zip(a, b)
+
 @register.filter
 @stringfilter
 def cleartags(value, tags):

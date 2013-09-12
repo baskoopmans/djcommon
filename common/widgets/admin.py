@@ -1,7 +1,6 @@
 # coding: utf-8
 
 from django.contrib.admin.widgets import ManyToManyRawIdWidget
-from django.utils.encoding import smart_unicode
 from django.utils.html import escape
 
 
@@ -22,7 +21,7 @@ class VerboseManyToManyRawIdWidget(ManyToManyRawIdWidget):
             try:
                 obj = self.rel.to._default_manager.using(self.db).get(**{key: v})
                 # manage unicode error, no HTML
-                values.append(u"%s - %s" % (v, escape(smart_unicode(obj))))
+                values.append(u"%s - %s" % (v, escape(obj)))
             except self.rel.to.DoesNotExist:
                 values.append(u'???')
         return u'&nbsp;<strong>%s</strong>' % u',&nbsp;'.join(values)
