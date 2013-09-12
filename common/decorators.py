@@ -6,22 +6,6 @@ import traceback
 from django.utils.safestring import SafeString
 
 
-def print_debug(function):
-    """
-    Reterns exception's debug when in <function> an error is raised.
-    """
-    def _print_debug(*args, **kwargs):
-        try:
-            return function(*args, **kwargs)
-        except Exception, e:
-            debug_info = []
-            for i, item in enumerate(traceback.extract_stack()[:]):
-                debug_info.append(", ".join([type(e).__name__, e.message, os.path.basename(item[0]), str(item[1])]))
-            result = "\r\n".join(debug_info)
-            return SafeString("<pre>%s</pre>" % result)
-            
-    return _print_debug
-
 def cached(function):
     """
     Save the result of this <function> in object.<function>_cache attribute
