@@ -2,6 +2,7 @@
 
 from django.db import models
 from django.db.models.query import QuerySet
+from django.utils.translation import gettext as _
 
 
 class OrderableModel(models.Model):
@@ -28,8 +29,8 @@ class OrderableModel(models.Model):
 
 
 class TimeStampedModel(models.Model):
-  date_created = models.DateTimeField(auto_now_add=True)
-  date_modified = models.DateTimeField(auto_now=True)
+  date_created = models.DateTimeField(_("date/time created"), auto_now_add=True)
+  date_modified = models.DateTimeField(_("date/time modified"), auto_now=True)
 
   class Meta:
       abstract = True

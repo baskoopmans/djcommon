@@ -58,7 +58,7 @@ class CombinedFieldsMixin(object):
 
                 _label_set.append(u"%s" % field.label)
 
-            _first_field.combined['label'] = u" + ".join(uniqify_list(_label_set))
+            _first_field.combined['label'] = u" + ".join(uniqify_list(_label_set, preserve_order=True))
             _first_field.combined['label'] = _first_field.combined['label']
             _first_field.combined['errors'] = ErrorDict()
             _first_field.combined['css_classes'] = ' '.join(_css_classes_set)
