@@ -2,6 +2,7 @@
 
 import sys
 import re
+import copy
 
 from importlib import import_module
 from decimal import Decimal
@@ -39,6 +40,18 @@ def contains(list, filter):
         if filter(x):
             return True
     return False
+
+def hash_recursive(mutable):
+  if isinstance(mutable, (set, tuple, list)):
+    return tuple([hash_recursive(item) for item in mutable])    
+  elif not isinstance(mutable, dict):
+    return hash(mutable)
+
+  new_mutable = copy.deepcopy(mutable)
+  for key, value in new_mutable.items():
+    new_mutable[key] = hash_recursive(value)
+
+  return hash(tuple(frozenset(new_mutable.items())))
 
 def get_json_object(request):
     data = None
