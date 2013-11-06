@@ -3,7 +3,6 @@
 from django import forms
 from django.db import models
 from django.db.models.fields import CharField
-from django.utils.encoding import force_unicode, StrAndUnicode
 from django.utils.text import capfirst
 
 class LazyChoiceField(forms.ChoiceField):
@@ -83,111 +82,6 @@ class MultiSelectField(models.Field):
             setattr(cls, 'get_%s_display' % self.name, func)
 
 
-class Country(StrAndUnicode):
-    def __init__(self, code):
-        self.code = code
-    
-    def __unicode__(self):
-        return force_unicode(self.code or u'')
-
-    def __eq__(self, other):
-        return unicode(self) == force_unicode(other)
-
-    def __ne__(self, other):
-        return not self.__eq__(other)
-
-    def __cmp__(self, other):
-        return cmp(unicode(self), force_unicode(other))
-
-    def __hash__(self):
-        return hash(unicode(self))
-
-    def __repr__(self):
-        return "%s(code=%r)" % (self.__class__.__name__, unicode(self))
-
-    def __nonzero__(self):
-        return bool(self.code)
-
-    def __len__(self):
-        return len(unicode(self))
-    
-    @property
-    def name(self):
-        # Local import so the countries aren't loaded unless they are needed. 
-        from common.conf.countries import COUNTRIES
-        for code, name in COUNTRIES:
-            if self.code == code:
-                return name
-        return ''
-
-    
-class CountryDescriptor(object):
-    """
-    A descriptor for country fields on a model instance. Returns a Country when
-    accessed so you can do stuff like::
-
-        >>> instance.country.name
-        u'New Zealand'
-
-        >>> instance.country.flag
-        '/static/flags/nz.gif'
-    """
-    def __init__(self, field):
-        self.field = field
-
-    def __get__(self, instance=None, owner=None):
-        if instance is None:
-            raise AttributeError(
-                "The '%s' attribute can only be accessed from %s instances."
-                % (self.field.name, owner.__name__))
-        return Country(code=instance.__dict__[self.field.name])
-
-    def __set__(self, instance, value):
-        if value is not None:
-            value = force_unicode(value)
-        instance.__dict__[self.field.name] = value
-
-
-class CountryField(CharField):
-    """
-    A country field for Django models that provides all ISO 3166-1 countries as choices.
-    """
-    descriptor_class = CountryDescriptor
- 
-    def __init__(self, *args, **kwargs):
-        # Local import so the countries aren't loaded unless they are needed. 
-        from common.conf.countries import COUNTRIES
-
-        kwargs.setdefault('max_length', 2) 
-        kwargs.setdefault('choices', COUNTRIES) 
-
-        super(CharField, self).__init__(*args, **kwargs) 
-
-    def get_internal_type(self): 
-        return "CharField"
-
-    def contribute_to_class(self, cls, name):
-        super(CountryField, self).contribute_to_class(cls, name)
-        setattr(cls, self.name, self.descriptor_class(self))
-
-    def get_prep_lookup(self, lookup_type, value):
-        if hasattr(value, 'code'):
-            value = value.code
-        return super(CountryField, self).get_prep_lookup(lookup_type, value)
-
-    def pre_save(self, *args, **kwargs):
-        "Returns field's value just before saving."
-        value = super(CharField, self).pre_save(*args, **kwargs)
-        return self.get_prep_value(value)
-
-    def get_prep_value(self, value):
-        "Returns field's value prepared for saving into a database."
-        # Convert the Country to unicode for database insertion.
-        if value is None:
-            return None
-        return unicode(value)
-
-
 class IntegerRangeField(models.IntegerField):
 
     def __init__(self, verbose_name=None, name=None, min_value=None, max_value=None, **kwargs):
@@ -211,113 +105,10 @@ class SmallIntegerRangeField(models.SmallIntegerField):
         defaults.update(kwargs)
         return super(SmallIntegerRangeField, self).formfield(**defaults)
 
-"""
-JSONField automatically serializes most Python terms to JSON data.
-Creates a TEXT field with a default value of "{}".  See test_json.py for
-more information.
-
- from django.db import models
- from django_extensions.db.fields import json
-
- class LOL(models.Model):
-     extra = json.JSONField()
-"""
-
-import datetime
-from decimal import Decimal
-from django.db import models
-from django.conf import settings
-from django.utils import simplejson
-from django.utils.encoding import smart_unicode
-
-
-class JSONEncoder(simplejson.JSONEncoder):
-    def default(self, obj):
-        if isinstance(obj, Decimal):
-            return str(obj)
-        elif isinstance(obj, datetime.datetime):
-            assert settings.TIME_ZONE == 'UTC'
-            return obj.strftime('%Y-%m-%dT%H:%M:%SZ')
-        return simplejson.JSONEncoder.default(self, obj)
-
-
-def dumps(value):
-    return JSONEncoder().encode(value)
-
-
-def loads(txt):
-    value = simplejson.loads(
-        txt,
-        parse_float=Decimal,
-        encoding=settings.DEFAULT_CHARSET
-    )
-    return value
-
-
-class JSONDict(dict):
-    """
-    Hack so repr() called by dumpdata will output JSON instead of
-    Python formatted data.  This way fixtures will work!
-    """
-    def __repr__(self):
-        return dumps(self)
-
-class JSONList(list):
-    """
-    As above
-    """
-    def __repr__(self):
-        return dumps(self)
-
-
-class JSONField(models.TextField):
-    """JSONField is a generic textfield that neatly serializes/unserializes
-    JSON objects seamlessly.  Main thingy must be a dict object."""
-
-    # Used so to_python() is called
-    __metaclass__ = models.SubfieldBase
-
-    def __init__(self, *args, **kwargs):
-        if 'default' not in kwargs:
-            kwargs['default'] = '{}'
-        models.TextField.__init__(self, *args, **kwargs)
-
-    def to_python(self, value):
-        """Convert our string value to JSON after we load it from the DB"""
-        if value is None or value == '':
-            return {}
-        elif isinstance(value, basestring):
-            res = loads(value)
-            if isinstance(res, dict):
-                return JSONDict(**res)
-            else:
-                return JSONList(res)
-
-        else:
-            return value
-
-    def get_db_prep_save(self, value, connection):
-        """Convert our JSON object to a string before we save"""
-        if not isinstance(value, (list, dict)):
-            return super(JSONField, self).get_db_prep_save("", connection=connection)
-        else:
-            return super(JSONField, self).get_db_prep_save(dumps(value),
-                connection=connection)
-
-    def south_field_triple(self):
-        "Returns a suitable description of this field for South."
-        # We'll just introspect the _actual_ field.
-        from south.modelsinspector import introspector
-        field_class = "django.db.models.fields.TextField"
-        args, kwargs = introspector(self)
-        # That's our definition!
-        return (field_class, args, kwargs)
-
 
 # If south is installed, ensure that CountryField and MultiSelectField will be introspected just like a normal CharField.
 try:
     from south.modelsinspector import add_introspection_rules
-    add_introspection_rules([], ['^common\.fields\.CountryField'])
     add_introspection_rules([], ['^common\.fields\.MultiSelectField'])
     add_introspection_rules([], ['^common\.fields\.IntegerRangeField'])
     add_introspection_rules([], ['^common\.fields\.SmallIntegerRangeField'])
