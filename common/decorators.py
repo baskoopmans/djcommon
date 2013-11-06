@@ -4,6 +4,7 @@ import os
 import traceback
 
 from django.utils.safestring import SafeString
+from django.utils.decorators import method_decorator
 
 
 def cached(function):
@@ -26,3 +27,26 @@ def cached(function):
         return result
             
     return _get_from_objects_cache
+
+
+def class_decorator(decorator):
+    """
+    usage:
+    in views.py
+
+        from django.views.decorators.cache import cache_control
+        from django.views.generic import View
+        @class_decorator(cache_control(max_age=60))
+        class MyView(View):
+            filename = 'templatefile'
+            def content(self, request):
+                ...
+    """
+    def inner(cls):
+        orig_dispatch = cls.dispatch
+        @method_decorator(decorator)
+        def new_dispatch(self, request, *args, **kwargs):
+            return orig_dispatch(self, request, *args, **kwargs)
+        cls.dispatch = new_dispatch
+        return cls
+    return inner
