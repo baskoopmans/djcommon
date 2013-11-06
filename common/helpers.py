@@ -51,7 +51,7 @@ def hash_recursive(mutable):
   for key, value in new_mutable.items():
     new_mutable[key] = hash_recursive(value)
 
-  return hash(tuple(frozenset(new_mutable.items())))
+  return hash(tuple(frozenset(sorted(new_mutable.items()))))
 
 def get_json_object(request):
     data = None
