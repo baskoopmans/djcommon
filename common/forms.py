@@ -35,7 +35,7 @@ class CombinedFieldsMixin(object):
             # when subclassing a subclassed form with extra fields
             # remove those fields when the field is in exclude list
             for field_name in getattr(self.Meta, 'exclude', ()):
-                if self.fields.has_key(field_name):
+                if field_name in self.fields:
                     del self.fields[field_name]
 
             # create combined_fields
