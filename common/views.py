@@ -2,7 +2,7 @@
 
 from django.http import HttpResponseNotAllowed
 from django.shortcuts import render_to_response
-from django.shortcuts import resolve_url
+from django.core import urlresolvers
 from django.template import RequestContext
 from django.conf import settings
 from django.contrib.auth.forms import AuthenticationForm
@@ -38,7 +38,7 @@ class LoginView(FormView):
     form_class = AuthenticationForm
 
     def form_valid(self, form):
-        redirect_to = resolve_url(settings.LOGIN_REDIRECT_URL)
+        redirect_to = settings.LOGIN_REDIRECT_URL
         auth_login(self.request, form.get_user())
         if self.request.session.test_cookie_worked():
             self.request.session.delete_test_cookie()
