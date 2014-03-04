@@ -102,7 +102,8 @@ class TemplatedEmail(EmailMultiRelated):
 
     """
 
-    def __init__(self, app_name, template_name, subject='', body='', context=None, request=None, from_email=None, to=None, bcc=None, connection=None, attachments=None, headers=None, alternatives=None, premailer=False):
+    def __init__(self, app_name, template_name, subject='', body='', context=None, request=None, from_email=None, to=None, \
+                 bcc=None, connection=None, attachments=None, headers=None, alternatives=None, premailer=False):
         self.app_name = app_name
         self.template_name = template_name
         self.premailer = premailer
@@ -121,12 +122,12 @@ class TemplatedEmail(EmailMultiRelated):
 
     def render_body(self, type):
         # get context_instance
-        template_list = ['email/%s/%s/body.%s' % (self.app_name, self.template_name, type), 'email/%s/body.%s' % (self.template_name, type)]
+        template_list = ['%s/interaction/email/%s/body.%s' % (self.app_name, self.template_name, type), 'interaction/email/%s/body.%s' % (self.template_name, type)]
         template = select_template(template_list)
         return template.render(self.context_instance)
 
     def render_subject(self):
-        template_list = ['email/%s/%s/subject.txt' % (self.app_name, self.template_name), 'email/%s/subject.txt' % self.template_name]
+        template_list = ['%s/interaction/email/%s/subject.txt' % (self.app_name, self.template_name), 'interaction/email/%s/subject.txt' % self.template_name]
         template = select_template(template_list)
         return template.render(self.context_instance).strip()
 
