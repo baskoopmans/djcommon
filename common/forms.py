@@ -39,8 +39,9 @@ class CombinedFieldsMixin(object):
                     del self.fields[field_name]
 
             # create combined_fields
-            self.combined_fields = getattr(self.Meta, 'combined_fields', ())
+            self.combined_fields = getattr(self.Meta, 'combined_fields', [])
 
+            # for each combination create a combined field class
             for combination in self.combined_fields:
                 _label_set = []
                 _css_classes_set = []
@@ -82,7 +83,7 @@ class CombinedFieldsMixin(object):
                     if counter == 0:
                         _first_field = field
 
-                    _error_set += self.errors.get(field_name, [])
+                    _error_set += self._errors.get(field_name, [])
 
                 _first_field.combined['errors'] = ErrorList(uniqify_list(_error_set, True))
 
