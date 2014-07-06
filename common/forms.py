@@ -2,7 +2,6 @@
 
 from django import forms
 from django.forms.util import ErrorList, ErrorDict
-from django.utils.copycompat import deepcopy
 from django.utils.translation import ugettext as _
 from django.utils.functional import lazy
 from django.utils.safestring import mark_safe
