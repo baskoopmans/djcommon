@@ -1,7 +1,7 @@
 # coding: utf-8
 
 from django.contrib.auth.models import User
-from django.core.validators import email_re
+from django.core.validators import validate_email
 
 from django.contrib.auth.backends import ModelBackend
 
@@ -18,7 +18,7 @@ class EmailBackend(ModelBackend):
     def authenticate(self, username=None, password=None):
         # get the user
         try:
-            if email_re.search(username):
+            if validate_email(username):
                 user = User.objects.get(email=username)
             else:
                 user = User.objects.get(username=username)
@@ -29,9 +29,3 @@ class EmailBackend(ModelBackend):
             return user
 
         return None
-
-    def get_user(self, user_id):
-        try:
-            return User.objects.get(pk=user_id)
-        except User.DoesNotExist:
-            return None
