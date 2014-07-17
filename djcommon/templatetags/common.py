@@ -11,6 +11,8 @@ from django.db.models.query import QuerySet
 from django.template.loader_tags import BlockNode, ExtendsNode
 from django.template import loader, Context, RequestContext, TextNode
 
+from .helpers import random_slice_list
+
 register = template.Library()
 
 
@@ -81,7 +83,6 @@ def direct_block_to_template(request, template, block, extra_context=None, mimet
     return HttpResponse(render_template_block(t, block, c), mimetype=mimetype)
 
 
-
 class RenderAsTemplateNode(template.Node):
     def __init__(self, item_to_be_rendered):
         self.item_to_be_rendered = Variable(item_to_be_rendered)
@@ -93,12 +94,14 @@ class RenderAsTemplateNode(template.Node):
         except template.VariableDoesNotExist:
             return ''
 
+
 @register.tag
 def render_as_template(parser, token):
     bits = token.split_contents()
     if len(bits) !=2:
         raise TemplateSyntaxError("'%s' takes only one argument (a variable representing a template to render)" % bits[0])
     return RenderAsTemplateNode(bits[1])
+
 
 class RenderTemplateBlockNode(template.Node):
     def __init__(self, template_name, block_name):
@@ -120,17 +123,6 @@ def render_template_block_tag(parser, token):
     if not (block_name[0] == block_name[-1] and block_name[0] in ('"', "'")):
         raise template.TemplateSyntaxError("%r tag's argument (block_name) should be in quotes" % tag_name)
     return RenderTemplateBlockNode(template_name, block_name)
-
-
-def random_slice_list(value, arg):
-    # Only pick if we are asked for fewer items than we are given
-    # Else number requested is equal to or greater than the number we have, return them all in random order
-    if len(value) > arg or arg == 1:
-        value = random.sample(value, arg)
-    else:
-        random.shuffle(value)
-
-    return value
 
 @register.filter_function
 def random_slice(value, arg=1):

@@ -1,9 +1,42 @@
-# coding: utf-8
+# encoding: utf-8
+
+import hashlib
 
 from django import forms
 from django.db import models
 from django.db.models.fields import CharField
 from django.utils.text import capfirst
+
+
+class HashField(models.CharField):
+    description = ('HashField is related to some other field in a model and'
+        'stores its hashed value for better indexing performance.')
+
+    def __init__(self, field_names, *args, **kwargs):
+        """
+        :param field_names: name of the field or fields storing the value to be hashed
+        """
+        self.field_names = field_names
+        kwargs['max_length'] = 40
+        kwargs['null'] = False
+        kwargs.setdefault('db_index', True)
+        kwargs.setdefault('editable', False)
+        super(HashField, self).__init__(*args, **kwargs)
+
+    def calculate_hash(self, model_instance):
+        string_to_hash = u''
+        for field_name in field_names.split(','):
+            field_name = field_name.strip()
+            field_value = getattr(model_instance, field_name)
+            string_to_hash += u"{0}".format(field_value)
+
+        hash = hashlib.sha1(string_to_hash).hexdigest()
+        setattr(model_instance, self.attname, hash)
+
+    def pre_save(self, model_instance, add):
+        self.calculate_hash(model_instance)
+        return super(HashField, self).pre_save(model_instance, add)
+
 
 class LazyChoiceField(forms.ChoiceField):
     #def __init__(self, choices=(), required=True, widget=None, label=None, initial=None, help_text=None, *args, **kwargs):
@@ -109,8 +142,8 @@ class SmallIntegerRangeField(models.SmallIntegerField):
 # If south is installed, ensure that CountryField and MultiSelectField will be introspected just like a normal CharField.
 try:
     from south.modelsinspector import add_introspection_rules
-    add_introspection_rules([], ['^common\.fields\.MultiSelectField'])
-    add_introspection_rules([], ['^common\.fields\.IntegerRangeField'])
-    add_introspection_rules([], ['^common\.fields\.SmallIntegerRangeField'])
+    add_introspection_rules([], ['^djcommon\.fields\.MultiSelectField'])
+    add_introspection_rules([], ['^djcommon\.fields\.IntegerRangeField'])
+    add_introspection_rules([], ['^djcommon\.fields\.SmallIntegerRangeField'])
 except ImportError:
     pass

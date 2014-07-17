@@ -1,0 +1,7 @@
+{% extends "admin/change_form.html" %}
+
+{% block inline_field_sets %}
+    {% for inline_admin_formset in inline_admin_formsets %}
+        {{ inline_admin_formset.formset.management_form }}
+    {% endfor %}
+{% endblock %}

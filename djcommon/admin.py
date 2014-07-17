@@ -6,7 +6,7 @@ from django.db import transaction
 from django.db.models import get_models, Model
 from django import forms
 
-from common.widgets.admin import VerboseManyToManyRawIdWidget
+from .widgets.admin import VerboseManyToManyRawIdWidget
 
 
 @transaction.commit_on_success

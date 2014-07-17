@@ -32,10 +32,18 @@ def uniqify_list(list, preserve_order=False):
         # Not order preserving, faster than the function above.
         return {}.fromkeys(list).keys()
 
-def contains(list, filter):
-    """
-    Example: if contains(a_list, lambda x: x.n == 3)  # True if any element has .n==3
-    """
+def random_slice_list(value, arg):
+    # Only pick if we are asked for fewer items than we are given
+    # Else number requested is equal to or greater than the number we have, return them all in random order
+    if len(value) > arg or arg == 1:
+        value = random.sample(value, arg)
+    else:
+        random.shuffle(value)
+
+    return value
+
+def list_contains(list, filter):
+    """Example: if list_contains(a_list, lambda x: x.n == 3)  # True if any element has .n==3"""
     for x in list:
         if filter(x):
             return True
