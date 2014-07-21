@@ -3,13 +3,13 @@
 import sys
 import re
 import copy
+import json
 
 from importlib import import_module
 from decimal import Decimal
 
 from django.conf import settings
 from django.core.exceptions import ObjectDoesNotExist
-from django.utils import simplejson
 
 
 # for formatting Decimal objects
@@ -65,7 +65,7 @@ def get_json_object(request):
     data = None
     if request.body:
         try:
-            data = simplejson.loads(request.body.replace("'","\""), encoding='utf-8')
+            data = json.loads(request.body.replace("'","\""), encoding='utf-8')
         except:
             data = data
 
