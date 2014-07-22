@@ -142,6 +142,7 @@ class SmallIntegerRangeField(models.SmallIntegerField):
 # If south is installed, ensure that CountryField and MultiSelectField will be introspected just like a normal CharField.
 try:
     from south.modelsinspector import add_introspection_rules
+    add_introspection_rules([], ['^djcommon\.fields\.HashField'])
     add_introspection_rules([], ['^djcommon\.fields\.MultiSelectField'])
     add_introspection_rules([], ['^djcommon\.fields\.IntegerRangeField'])
     add_introspection_rules([], ['^djcommon\.fields\.SmallIntegerRangeField'])
