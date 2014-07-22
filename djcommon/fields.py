@@ -21,7 +21,7 @@ class HashField(models.CharField):
         kwargs['null'] = False
         kwargs.setdefault('db_index', True)
         kwargs.setdefault('editable', False)
-        super(HashField, self).__init__(*args, **kwargs)
+        super(HashField, self).__init__(field_names, *args, **kwargs)
 
     def calculate_hash(self, model_instance):
         string_to_hash = u''
