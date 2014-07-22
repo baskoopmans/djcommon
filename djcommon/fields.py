@@ -25,7 +25,7 @@ class HashField(models.CharField):
 
     def calculate_hash(self, model_instance):
         string_to_hash = u''
-        for field_name in field_names.split(','):
+        for field_name in self.field_names.split(','):
             field_name = field_name.strip()
             field_value = getattr(model_instance, field_name)
             string_to_hash += u"{0}".format(field_value)
