@@ -12,7 +12,7 @@ class HashField(models.CharField):
     description = ('HashField is related to some other field in a model and'
         'stores its hashed value for better indexing performance.')
 
-    def __init__(self, field_names, *args, **kwargs):
+    def __init__(self, field_names='', *args, **kwargs):
         """
         :param field_names: name of the field or fields storing the value to be hashed
         """
@@ -21,7 +21,7 @@ class HashField(models.CharField):
         kwargs['null'] = False
         kwargs.setdefault('db_index', True)
         kwargs.setdefault('editable', False)
-        super(HashField, self).__init__(field_names, *args, **kwargs)
+        super(HashField, self).__init__(*args, **kwargs)
 
     def calculate_hash(self, model_instance):
         string_to_hash = u''
