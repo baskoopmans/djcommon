@@ -62,6 +62,7 @@ class MultiSelectFormField(forms.MultipleChoiceField):
                     % (apnumber(self.max_choices), pluralize(self.max_choices)))
         return value
 
+
 class MultiSelectField(models.Field):
     """
     Credits go to Daniel Roseman
