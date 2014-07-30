@@ -24,14 +24,16 @@ class HashField(models.CharField):
         super(HashField, self).__init__(*args, **kwargs)
 
     def calculate_hash(self, model_instance):
-        string_to_hash = u''
+        string_to_hash = ''
         for field_name in self.field_names.split(','):
             field_name = field_name.strip()
             field_value = getattr(model_instance, field_name)
-            string_to_hash += u"{0}".format(field_value)
+            field_value = u"{0}".format(field_value)
+            string_to_hash += hashlib.sha1(field_value.encode('utf-8')).hexdigest()
 
         hash = hashlib.sha1(string_to_hash).hexdigest()
         setattr(model_instance, self.attname, hash)
+        return hash
 
     def pre_save(self, model_instance, add):
         self.calculate_hash(model_instance)

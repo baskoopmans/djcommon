@@ -1,51 +1,41 @@
-# coding: utf-8
+# encoding: utf-8
+
+import unittest
+
 from django.test import TestCase
-from django_countries import settings
+from django.db import models
+from djcommon.fields import HashField
 
 
-class TestCountryField(TestCase):
+class ExampleModel(models.Model):
+    name = models.CharField(max_length=100)
+    description = models.CharField(max_length=255)
+    hash = HashField(field_names='name,description')
 
-    def create_person(self, country='NZ'):
-        from django_countries.tests import Person
-        return Person.objects.create(name='Chris Beaven', country=country)
+	
+class TestHashField(TestCase):
 
-    def test_logic(self):
-        person = self.create_person()
+    def setUp(self):
+        pass
 
-        self.assertEqual(person.country, 'NZ')
-        self.assertNotEqual(person.country, 'ZZ')
-
-        self.assert_(person.country < 'OA')
-        self.assert_(person.country > 'NY')
-
-        self.assert_(person.country)
-        person.country = ''
-        self.assertFalse(person.country)
+    def test_string(self):
+        instance = ExampleModel(name="Cafe", description="Lorem ipsum")
+        hash_field = instance._meta.get_field_by_name('hash')[0]
+        hash = hash_field.calculate_hash(instance)
+        self.assertEqual(hash, 'e1500c515a62b8d6b846d074ad8625296e2fa6ef')
 
     def test_unicode(self):
-        person = self.create_person()
-        self.assertEqual(unicode(person.country), 'NZ')
+        instance = ExampleModel(name=u"Café", description="Lorem ipsum")
+        hash_field = instance._meta.get_field_by_name('hash')[0]
+        hash = hash_field.calculate_hash(instance)
+        self.assertEqual(hash, 'e17e90a9d2f5b1886390fd60e04888160472b919')
 
-    def test_name(self):
-        person = self.create_person()
-        self.assertEqual(person.country.name, u'New Zealand')
+    def test_integer(self):
+        instance = ExampleModel(name=1, description="Lorem ipsum")
+        hash_field = instance._meta.get_field_by_name('hash')[0]
+        hash = hash_field.calculate_hash(instance)
+        self.assertEqual(hash, 'd0b5f95036dd47053e640b7de3b3f3bad4211b13')
 
-    def test_flag(self):
-        person = self.create_person()
-        expected_url = settings.FLAG_URL % {'code': 'nz', 'code_upper': 'NZ'}
-        self.assertEqual(person.country.flag, expected_url)
 
-    def test_blank(self):
-        from django_countries.tests import Person
-        person = self.create_person(country=None)
-        self.assertEqual(person.country, '')
-
-        person = Person.objects.get(pk=person.pk)
-        self.assertEqual(person.country, '')
-
-    def test_len(self):
-        person = self.create_person()
-        self.assertEqual(len(person.country), 2)
-
-        person = self.create_person(country=None)
-        self.assertEqual(len(person.country), 0)
+if __name__ == '__main__':
+    unittest.main()
