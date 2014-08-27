@@ -1,5 +1,6 @@
 # coding: utf-8
 
+from django.conf import settings
 from django.db import models
 from django.db.models.query import QuerySet
 from django.utils.translation import gettext as _
@@ -31,6 +32,13 @@ class OrderableModel(models.Model):
 class TimeStampedModel(models.Model):
   date_created = models.DateTimeField(_("date/time created"), auto_now_add=True)
   date_modified = models.DateTimeField(_("date/time modified"), auto_now=True)
+
+  class Meta:
+      abstract = True
+
+
+class LanguageMixin(models.Model):
+  language = models.CharField(max_length=7, choices=settings.LANGUAGES, db_index=True)
 
   class Meta:
       abstract = True
