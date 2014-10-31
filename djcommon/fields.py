@@ -55,7 +55,7 @@ class MultiSelectFormField(forms.MultipleChoiceField):
         self.max_choices = kwargs.pop('max_choices', 0)
         super(MultiSelectFormField, self).__init__(*args, **kwargs)
         self.initial = kwargs.pop('initial', '').split(',')
- 
+
     def clean(self, value):
         if not value and self.required:
             raise forms.ValidationError(self.error_messages['required'])
@@ -110,7 +110,7 @@ class MultiSelectField(models.Field):
 
     def validate(self, value, model_instance):
         return
-    
+
     def contribute_to_class(self, cls, name):
         super(MultiSelectField, self).contribute_to_class(cls, name)
         if self.choices:
@@ -142,7 +142,7 @@ class SmallIntegerRangeField(models.SmallIntegerField):
         return super(SmallIntegerRangeField, self).formfield(**defaults)
 
 
-# If south is installed, ensure that CountryField and MultiSelectField will be introspected just like a normal CharField.
+# Add introspection rules for fields for South
 try:
     from south.modelsinspector import add_introspection_rules
     add_introspection_rules([], ['^djcommon\.fields\.HashField'])

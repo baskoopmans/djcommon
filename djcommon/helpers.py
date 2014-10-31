@@ -4,6 +4,7 @@ import sys
 import re
 import copy
 import json
+import random
 
 from importlib import import_module
 from decimal import Decimal
@@ -51,7 +52,7 @@ def list_contains(list, filter):
 
 def hash_recursive(mutable):
   if isinstance(mutable, (set, tuple, list)):
-    return tuple([hash_recursive(item) for item in mutable])    
+    return tuple([hash_recursive(item) for item in mutable])
   elif not isinstance(mutable, dict):
     return hash(mutable)
 

@@ -1,17 +1,17 @@
 # coding: utf-8
 
 import re
-import random
 
 from django import template
 from django.template.defaultfilters import stringfilter
-from django.template import loader, Template, Variable, TemplateSyntaxError
+from django.template import Template, Variable, TemplateSyntaxError
+from django.http import HttpResponse
 from django.db.models.query import QuerySet
 
 from django.template.loader_tags import BlockNode, ExtendsNode
 from django.template import loader, Context, RequestContext, TextNode
 
-from .helpers import random_slice_list
+from djcommon.helpers import random_slice_list
 
 register = template.Library()
 
@@ -184,7 +184,7 @@ def nowhitespace(value):
     return u"".join(value.split())
 nowhitespace.is_safe = True
 
-@register.filter    
+@register.filter
 def cleanwhitespace(value):
     "Removes all multiple whitespace from the given string"
     return u" ".join(value.split())
@@ -195,7 +195,7 @@ cleanwhitespace.is_safe = True
 def startswith(value, arg):
     "Checks if the given string starts with arg"
     return value.startswith(arg)
-    
+
 @register.filter
 @stringfilter
 def endswith(value, arg):
