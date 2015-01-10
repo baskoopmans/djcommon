@@ -3,4 +3,6 @@
 *~
 .idea
 settings.py
-_bat
+build
+dist
+*.egg-info
