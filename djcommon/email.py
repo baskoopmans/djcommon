@@ -13,11 +13,10 @@ class EmailMultiRelated(EmailMultiAlternatives):
     """
     related_subtype = 'related'
 
-    def __init__(self, subject='', body='', from_email=None, to=None, bcc=None,
-                 connection=None, attachments=None, headers=None, alternatives=None):
+    def __init__(self, *args, **kwargs):
         # self.related_ids = []
         self.related_attachments = []
-        return super(EmailMultiRelated, self).__init__(subject, body, from_email, to, bcc, connection, attachments, headers, alternatives)
+        return super(EmailMultiRelated, self).__init__(*args, **kwargs)
 
     def attach_related(self, filename=None, content=None, mimetype=None):
         """
@@ -79,7 +78,7 @@ class EmailMultiRelated(EmailMultiAlternatives):
             attachment.add_header('Content-ID', '<%s>' % filename)
         return attachment
 
-class TemplatedEmail(EmailMultiRelated):
+class TemplatedEmail(EmailMultiAlternatives):
     """
     A version of EmailMultiRelated, EmailMultiAlternatives, EmailMessage that makes it easy to send templated messages.
 
@@ -107,21 +106,16 @@ class TemplatedEmail(EmailMultiRelated):
         self.app_name = app_name
         self.template_name = template_name
         self.premailer = premailer
-        if not hasattr(to, "__iter__"):
-            to = [to]
-        if context is None:
-            context = {}
-        if request:
-            self.context_instance = RequestContext(request, context)
-        else:
-            self.context_instance = Context(context)
-        body = self.render_body('txt')
+        to = to if not to or hasattr(to, "__iter__") else [to]
+        bcc = bcc if not bcc or hasattr(bcc, "__iter__") else [bcc]
+        context = context or {}
+        self.context_instance = RequestContext(request, context) if request else Context(context)
         subject = self.render_subject()
+        body = self.render_body('txt')
         super(TemplatedEmail, self).__init__(subject, body, from_email, to, bcc, connection, attachments, headers, alternatives)
         self.attach_body('html')
 
     def render_body(self, type):
-        # get context_instance
         template_list = ['%s/interaction/email/%s/body.%s' % (self.app_name, self.template_name, type), 'interaction/email/%s/body.%s' % (self.template_name, type)]
         template = select_template(template_list)
         return template.render(self.context_instance)
@@ -158,13 +152,7 @@ class TemplatedEmail(EmailMultiRelated):
         except TemplateDoesNotExist:
             pass
 
-# Create a helper?
-# def send_html_mail()
-# def send_mass_html_mail()
-# send_mail()
-# send_mail(subject, message, from_email, recipient_list, fail_silently=False, auth_user=None, auth_password=None, connection=None)
-# The simplest way to send email is using django.core.mail.send_mail().
-#
+
 # The subject, message, from_email and recipient_list parameters are required.
 #
 # subject: A string.
