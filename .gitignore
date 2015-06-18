@@ -1,6 +1,6 @@
 *.pyc
 *.DS_Store
-*~
 .idea
-settings.py
-_bat
+*.egg-info
+dist
+build

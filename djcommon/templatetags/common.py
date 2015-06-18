@@ -1,6 +1,7 @@
-# coding: utf-8
+# encoding: utf-8
 
 import re
+import urllib
 
 from django import template
 from django.template.defaultfilters import stringfilter
@@ -201,3 +202,9 @@ def startswith(value, arg):
 def endswith(value, arg):
     "Checks if the given string ends with arg"
     return value.endswith(arg)
+
+@register.filter
+@stringfilter
+def urlunquote(value):
+    "Unquote a url"
+    return urllib.unquote(value)
